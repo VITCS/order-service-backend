@@ -1,0 +1,76 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+    commands:
+      # Install packages or any pre-reqs in this phase.
+      # Upgrading SAM CLI to latest version
+      - pip3 install --upgrade aws-sam-cli
+      - sam --version
+      # Installing project dependencies
+      - cd customer-api
+      - npm install
+      - cd ..
+
+  pre_build:
+    commands:
+      # Run tests, lint scripts or any other pre-build checks.
+      #- npm run test
+
+  build:
+    commands:
+      # Use Build phase to build your artifacts (compile, etc.)
+      - cd CustomerProfile && sam build
+      - cd ../CustomerPaymentSetup && sam build
+      - cd ../CustomerOccasion && sam build
+      - cd ../CustomerContact && sam build
+      - cd ../CustomerAddress && sam build
+      - cd ../Cart && sam build
+      - cd ../CartShipment && sam build
+      - cd ../customer-api && sam build
+      - cd datasources
+      - cd CustomerProfile && sam build -t CustomerProfile.yaml
+      - cd ../SearchStoreProd && sam build -t SearchStoreProd.yaml
+      - cd ../CustomerPaymentSetup && sam build -t CustomerPayment.yaml
+      - cd ../CustomerOccasion && sam build -t CustomerOccasion.yaml
+      - cd ../CustomerContact && sam build -t CustomerContact.yaml
+      - cd ../CustomerAddress && sam build -t CustomerAddress.yaml
+      - cd ../Cart && sam build -t Cart.yaml
+      - cd ../CartShipment && sam build -t CartShipment.yaml
+      # Now Build Dependencies
+      - cd ../CustomerProfile && sam build -t CustomerProfile_dep.yaml
+      - cd ../CustomerPaymentSetup && sam build -t CustomerPaymentSetup_dep.yaml
+      - cd ../CustomerContact && sam build -t CustomerContact_dep.yaml
+      - cd ../CustomerAddress && sam build -t CustomerAddress_dep.yaml
+
+      - cd ../..
+      - cd ..
+
+  post_build:
+    commands:
+      # Use Post-Build for notifications, git tags, upload artifacts to S3
+      - cd CustomerProfile && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerPaymentSetup && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerOccasion && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerContact && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerAddress && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../Cart && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CartShipment && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../customer-api && sam deploy --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd datasources/CustomerProfile
+      - cd ../CustomerProfile && sam deploy -t CustomerProfile.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../SearchStoreProd && sam deploy -t SearchStoreProd.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerPaymentSetup && sam deploy -t CustomerPayment.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerOccasion && sam deploy -t CustomerOccasion.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerContact && sam deploy -t CustomerContact.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerAddress && sam deploy -t CustomerAddress.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../Cart && sam deploy -t Cart.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CartShipment && sam deploy -t CartShipment.yaml --config-env ${env} --no-confirm-changeset --no-fail-on-empty-changeset
+      # Now Deploy Dependencies
+      - cd ../CustomerProfile && sam deploy -t CustomerProfile_dep.yaml --config-env ${env}dep --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerPaymentSetup && sam deploy -t CustomerPaymentSetup_dep.yaml --config-env ${env}dep --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerContact && sam deploy -t CustomerContact_dep.yaml --config-env ${env}dep --no-confirm-changeset --no-fail-on-empty-changeset
+      - cd ../CustomerAddress && sam deploy -t CustomerAddress_dep.yaml --config-env ${env}dep --no-confirm-changeset --no-fail-on-empty-changeset
+
+      - cd ../..
